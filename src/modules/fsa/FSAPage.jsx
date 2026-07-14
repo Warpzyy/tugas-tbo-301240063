@@ -1,11 +1,15 @@
 import { useState } from 'react'
-import DefinitionEditor from './components/DefinitionEditor.jsx'
-import SimulationPanel from './components/SimulationPanel.jsx'
 import { exampleDFA } from './logic/exampleFSA.js'
 import { isDeterministic } from '../../shared/fsaModel.js'
+import DefinitionEditor from './components/DefinitionEditor.jsx'
+import SimulationPanel from './components/SimulationPanel.jsx'
+import StateDiagram from './components/StateDiagram.jsx' // Pastikan file StateDiagram sudah dipindah ke folder ini
 
 export default function FSAPage() {
   const [fsa, setFsa] = useState(exampleDFA)
+  // State tambahan untuk memantau transisi langkah yang sedang aktif disimulasikan
+  const [activeState, setActiveState] = useState(null)
+  
   const deterministic = isDeterministic(fsa)
 
   return (
@@ -26,6 +30,7 @@ export default function FSAPage() {
         biner berakhiran <span className="font-mono">01</span>.
       </p>
 
+      {/* Grid Utama untuk Editor dan Panel Simulasi */}
       <div className="grid md:grid-cols-2 gap-6">
         <section className="border border-slate-200 rounded-lg p-4">
           <h3 className="text-sm font-bold uppercase text-slate-400 mb-3">
@@ -38,8 +43,21 @@ export default function FSAPage() {
           <h3 className="text-sm font-bold uppercase text-slate-400 mb-3">
             Simulasi
           </h3>
-          <SimulationPanel fsa={fsa} />
+          {/* Mengirimkan setActiveState agar panel simulasi bisa memberi tahu state mana yang sedang aktif saat ini */}
+          <SimulationPanel fsa={fsa} onStepChange={setActiveState} />
         </section>
+      </div>
+
+      {/* AREA VISUALISASI GRAFIS DIAGRAM STATE */}
+      <div className="mt-8">
+        <StateDiagram 
+          states={fsa.states || []} 
+          alphabet={fsa.alphabet || []} 
+          transitions={fsa.transitions || {}} 
+          startState={fsa.startState || ''} 
+          finalStates={fsa.finalStates || []} 
+          activeState={activeState || fsa.startState} 
+        />
       </div>
     </div>
   )
